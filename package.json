@@ -18,7 +18,7 @@
   },
   "main": "dist/extension/index.js",
   "engines": {
-    "node": ">=18",
+    "node": ">=20",
     "vscode": "^1.93.0"
   },
   "activationEvents": [],
