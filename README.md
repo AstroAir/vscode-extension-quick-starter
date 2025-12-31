@@ -1,480 +1,158 @@
-# @tomjs/vite-plugin-vscode
+# VSCode Extension Quick Starter
 
-[![npm](https://img.shields.io/npm/v/@tomjs/vite-plugin-vscode)](https://www.npmjs.com/package/@tomjs/vite-plugin-vscode) ![node-current (scoped)](https://img.shields.io/node/v/@tomjs/vite-plugin-vscode) ![NPM](https://img.shields.io/npm/l/@tomjs/vite-plugin-vscode) [![jsDocs.io](https://img.shields.io/badge/jsDocs.io-reference-blue)](https://www.jsdocs.io/package/@tomjs/vite-plugin-vscode)
-
-**English** | [中文](./README.zh_CN.md)
-
-> Use `vue`/`react` to develop [vscode extension webview](https://code.visualstudio.com/api/references/vscode-api#WebviewPanel), supporting `esm` and `cjs`.
-
-During development, inject code into both `vscode extension code` and `web page` code to support `HMR`; during production builds, inject the final generated `index.html` code into the `vscode extension code` to minimize manual effort.
+A modern VSCode extension starter template with **React + shadcn/ui + Tailwind CSS**.
 
 ## Features
 
-- Use [tsdown](https://tsdown.dev/) to quickly build `extension code`
-- Simple configuration, focus on business
-- Support `esm` and `cjs`
-- Support ESM extension (vscode `v1.100.0+`)
-- Support webview `HMR`
-- Support `acquireVsCodeApi` of [@types/vscode-webview](https://www.npmjs.com/package/@types/vscode-webview)
-- Support [Multi-Page App](https://vitejs.dev/guide/build.html#multi-page-app)
-- Supports `vue` and `react` and other [frameworks](https://cn.vitejs.dev/guide/#trying-vite-online) supported by `vite`
+- ⚡ **Vite** - Lightning fast HMR for development
+- ⚛️ **React 19** - Latest React with hooks
+- 🎨 **shadcn/ui** - Beautiful, accessible components
+- 🎯 **Tailwind CSS v4** - Utility-first CSS framework
+- 📦 **TypeScript** - Full type safety
+- 🔧 **ESLint** - Code quality and consistency
+- 🚀 **Hot Module Replacement** - Instant feedback during development
+- ✅ **Vitest** - Fast unit testing with React Testing Library
+- 🧪 **Extension Tests** - VSCode extension integration tests
+- 🔄 **GitHub Actions** - CI/CD workflows for testing and releases
 
-### ESM extension
+## Project Structure
 
-The NodeJS extension host now (`v1.100.0+`) supports extensions that use JavaScript-modules (ESM). All it needs is the `"type": "module"` entry in your extension's `package.json` file. With that, the JavaScript code can use `import` and `export` statements, including the special module `import('vscode')`.
+```text
+├── extension/              # VSCode extension code
+│   ├── index.ts            # Extension entry point
+│   └── views/              # Webview panel logic
+├── webview/                # React frontend
+│   ├── App.tsx             # Main React component
+│   ├── components/ui/      # shadcn/ui components
+│   ├── lib/utils.ts        # Utility functions
+│   ├── __tests__/          # React component tests
+│   └── index.css           # Tailwind CSS styles
+├── __tests__/              # Extension integration tests
+│   └── extension/          # VSCode extension tests
+├── .github/                # GitHub workflows & templates
+│   ├── workflows/          # CI/CD workflows
+│   └── ISSUE_TEMPLATE/     # Issue templates
+├── .vscode/                # VSCode settings & launch config
+├── index.html              # HTML entry point
+├── vite.config.ts          # Vite configuration
+├── vitest.config.ts        # Vitest test configuration
+└── package.json            # Project configuration
+```
 
-## Install
+## Getting Started
+
+### Prerequisites
+
+- Node.js >= 18
+- pnpm (recommended) or npm
+
+### Installation
 
 ```bash
-# pnpm
-pnpm add @tomjs/vite-plugin-vscode -D
-
-# yarn
-yarn add @tomjs/vite-plugin-vscode -D
-
-# npm
-npm i @tomjs/vite-plugin-vscode -D
-```
-
-## Usage
-
-### Recommended
-
-Setting `recommended` will modify some preset configurations. See [PluginOptions](#pluginoptions) and `recommended` parameter descriptions in detail.
-
-#### Directory Structure
-
-- By default, `recommended:true` will be based on the following directory structure as a convention.
-
-```
-|--extension      // extension code
-|  |--index.ts
-|--src            // front-end code
-|  |--App.vue
-|  |--main.ts
-|--index.html
-```
-
-- Zero configuration, default dist output directory
-
-```
-|--dist
-|  |--extension
-|  |  |--index.js
-|  |  |--index.js.map
-|  |--webview
-|  |  |--index.html
-```
-
-- If you want to modify the `extension` source code directory to `src`, you can set `{ extension: { entry: 'src/index.ts' } }`
-
-```
-|--src            // extension code
-|  |--index.ts
-|--webview        // front-end code
-|  |--App.vue
-|  |--main.ts
-|--index.html
-```
-
-### extension
-
-code snippet, more code see examples
-
-```ts
-import { getWebviewHtml } from 'virtual:vscode';
-
-const panel = window.createWebviewPanel('showHelloWorld', 'Hello World', ViewColumn.One, {
-  enableScripts: true,
-  localResourceRoots: [Uri.joinPath(extensionUri, 'dist/webview')],
-});
-
-// Vite development mode and production mode inject different webview codes to reduce development work
-panel.webview.html = getWebviewHtml({
-  // vite dev mode
-  serverUrl: process.env.VITE_DEV_SERVER_URL,
-  // vite prod mode
-  webview,
-  context,
-  inputName: 'index',
-  injectCode: `<script>window.__FLAG1__=666;window.__FLAG2__=888;</script>`,
-});
-```
-
-- `package.json`
-
-```json
-{
-  "main": "dist/extension/index.js"
-}
-```
-
-### vue
-
-- `vite.config.ts`
-
-```ts
-import vscode from '@tomjs/vite-plugin-vscode';
-import vue from '@vitejs/plugin-vue';
-import { defineConfig } from 'vite';
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          isCustomElement: (tag: string) => tag.startsWith('vscode-'),
-        },
-      },
-    }),
-    vscode(),
-    // Modify the extension source code entry path, and also modify the `index.html` entry file path
-    // vscode({ extension: { entry: 'src/index.ts' } }),
-  ],
-});
-```
-
-### react
-
-- `vite.config.ts`
-
-```ts
-import vscode from '@tomjs/vite-plugin-vscode';
-import react from '@vitejs/plugin-react-swc';
-import { defineConfig } from 'vite';
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react(), vscode()],
-});
-```
-
-### **getWebviewHtml**
-
-See [vue-import](./examples/vue-import) example
-
-- `vite.config.ts`
-
-```ts
-import path from 'node:path';
-import vscode from '@tomjs/vite-plugin-vscode';
-import { defineConfig } from 'vite';
-
-export default defineConfig({
-  plugins: [vscode()],
-  build: {
-    rollupOptions: {
-      // https://cn.vitejs.dev/guide/build.html#multi-page-app
-      input: [path.resolve(__dirname, 'index.html'), path.resolve(__dirname, 'index2.html')],
-      // You can also customize the name
-      // input:{
-      //   'index': path.resolve(__dirname, 'index.html'),
-      //   'index2': path.resolve(__dirname, 'index2.html'),
-      // }
-    },
-  },
-});
-```
-
-- page one
-
-```ts
-import { getWebviewHtml } from 'virtual:vscode';
-
-getWebviewHtml({
-  // vite dev mode
-  serverUrl: process.env.VITE_DEV_SERVER_URL,
-  // vite prod mode
-  webview,
-  context,
-});
-```
-
-- page two
-
-```ts
-import { getWebviewHtml } from 'virtual:vscode';
-
-getWebviewHtml({
-  // vite dev mode
-  serverUrl: `${process.env.VITE_DEV_SERVER_URL}/index2.html`,
-  // vite prod mode
-  webview,
-  context,
-  inputName: 'index2',
-});
-```
-
-- A single page uses different parameters to achieve different functions
-
-```ts
-import { getWebviewHtml } from 'virtual:vscode';
-
-getWebviewHtml({
-  // vite dev mode
-  serverUrl: `${process.env.VITE_DEV_SERVER_URL}?id=666`,
-  // vite prod mode
-  webview,
-  context,
-  injectCode: `<script>window.__id__=666;</script>`,
-});
-```
-
-**getWebviewHtml** Description
-
-```ts
-interface WebviewHtmlOptions {
-  /**
-   * `[vite serve]` The url of the vite dev server. Please use `process.env.VITE_DEV_SERVER_URL`
-   */
-  serverUrl?: string;
-  /**
-   * `[vite build]` The Webview instance of the extension.
-   */
-  webview: Webview;
-  /**
-   * `[vite build]` The ExtensionContext instance of the extension.
-   */
-  context: ExtensionContext;
-  /**
-   * `[vite build]` vite build.rollupOptions.input name. Default is `index`.
-   */
-  inputName?: string;
-  /**
-   * `[vite build]` Inject code into the afterbegin of the head element.
-   */
-  injectCode?: string;
-}
-```
-
-### Warning
-
-When using the `acquireVsCodeApi().getState()` method of [@types/vscode-webview](https://www.npmjs.com/package/@types/vscode-webview), you must use `await` to call it. Since `acquireVsCodeApi` is a simulated implementation of this method by the plugin, it is inconsistent with the original method. I am very sorry. If you have other solutions, please share them. Thank you very much.
-
-```ts
-const value = await acquireVsCodeApi().getState();
-```
-
-## Parameters
-
-### PluginOptions
-
-| Property    | Type                                                     | Default              | Description                                                                                                                                                                           |
-| ----------- | -------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| recommended | `boolean`                                                | `true`               | This option is intended to provide recommended default parameters and behavior.                                                                                                       |
-| extension   | [ExtensionOptions](#ExtensionOptions)                    |                      | Configuration options for the vscode extension.                                                                                                                                       |
-| webview     | `boolean` \| `string` \| [WebviewOption](#WebviewOption) | `__getWebviewHtml__` | Inject html code                                                                                                                                                                      |
-| devtools    | `boolean`                                                | `true`               | Inject script code for [react-devtools](https://github.com/facebook/react/tree/main/packages/react-devtools) or [vue-devtools](https://devtools.vuejs.org/guide/standalone) debugging |
-
-#### Notice
-
-The `recommended` option is used to set the default configuration and behavior, which can be used with almost zero configuration. The default is `true`. If you want to customize the configuration, set it to `false`. The following default prerequisites are to use the recommended [project structure](#directory-structure).
-
-- The output directory is based on the `build.outDir` parameter of `vite`, and outputs `extension` and `src` to `dist/extension` and `dist/webview` respectively.
-- Other behaviors to be implemented
-
-#### devtools
-
-During development, support standalone development tool applications for `react` and `vue`, enabled by default.
-
-- `react`: inject `<script src="http://localhost:8097"></script>`, support [react-devtools](https://github.com/facebook/react/tree/main/packages/react-devtools)
-- `vue`: inject `<script src="http://localhost:8098"></script>`, support [vue-devtools](https://devtools.vuejs.org/guide/standalone)
-
-### ExtensionOptions
-
-Based on [Options](https://tsdown.dev/reference/api/Interface.Options) of [tsdown](https://tsdown.dev/), some default values are added for ease of use.
-
-| Property   | Type                 | Default               | Description                                        |
-| ---------- | -------------------- | --------------------- | -------------------------------------------------- |
-| entry      | `string`             | `extension/index.ts`  | The vscode extension entry file.                   |
-| outDir     | `string`             | `dist-extension/main` | The output directory for the vscode extension file |
-| watchFiles | `string`\/`string[]` | ``                    | Watch extension code files during development      |
-
-### WebviewOption
-
-| Property | Type     | Default                                                                                                                                                          | Description                    |
-| -------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| csp      | `string` | `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src {{cspSource}} 'unsafe-inline'; script-src 'nonce-{{nonce}}' 'unsafe-eval';">` | The `CSP` meta for the webview |
-
-- `{{cspSource}}`: [webview.cspSource](https://code.visualstudio.com/api/references/vscode-api#Webview)
-- `{{nonce}}`: uuid
-
-### Additional Information
-
-- Default values for `extension` when the relevant parameters are not configured
-
-| Parameter | Development Mode Default | Production Mode Default |
-| --------- | ------------------------ | ----------------------- |
-| sourcemap | `true`                   | `false`                 |
-| minify    | `false`                  | `true`                  |
-
-## Environment Variables
-
-### Vite plugin variables
-
-`vscode extension` use.
-
-- `development` mode
-
-| Variable              | Description                    |
-| --------------------- | ------------------------------ |
-| `VITE_DEV_SERVER_URL` | The url of the vite dev server |
-
-- `production` mode
-
-| Variable            | Description                   |
-| ------------------- | ----------------------------- |
-| `VITE_WEBVIEW_DIST` | vite webview page output path |
-
-## Debug
-
-Run `Debug Extension` through `vscode` to debug. For debugging tools, refer to [Official Documentation](https://code.visualstudio.com/docs/editor/debugging)
-
-`launch.json` is configured as follows:
-
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Debug Extension",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-      "outFiles": ["${workspaceFolder}/dist/extension/*.js"],
-      "preLaunchTask": "npm: dev"
-    },
-    {
-      "name": "Preview Extension",
-      "type": "extensionHost",
-      "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-      "outFiles": ["${workspaceFolder}/dist/extension/*.js"],
-      "preLaunchTask": "npm: build"
-    }
-  ]
-}
-```
-
-`tasks.json` is configured as follows:
-
-```json
-{
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "type": "npm",
-      "script": "dev",
-      "problemMatcher": {
-        "owner": "typescript",
-        "fileLocation": "relative",
-        "pattern": {
-          "regexp": "^([a-zA-Z]\\:/?([\\w\\-]/?)+\\.\\w+):(\\d+):(\\d+): (ERROR|WARNING)\\: (.*)$",
-          "file": 1,
-          "line": 3,
-          "column": 4,
-          "code": 5,
-          "message": 6
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "^.*extension build start*$",
-          "endsPattern": "^.*extension (build|rebuild) success.*$"
-        }
-      },
-      "isBackground": true,
-      "presentation": {
-        "reveal": "never"
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
-    },
-    {
-      "type": "npm",
-      "script": "build",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": []
-    }
-  ]
-}
-```
-
-## Examples
-
-First execute the following command to install dependencies and generate library files:
-
-```bash
+# Install dependencies
 pnpm install
+
+# Start development server
+pnpm dev
+```
+
+### Development
+
+1. Press `F5` to open a new VSCode window with the extension loaded
+2. Run the command `Hello World: Show` from the Command Palette (`Ctrl+Shift+P`)
+3. The webview will open with hot reload enabled
+
+### Build
+
+```bash
+# Build for production
 pnpm build
 ```
 
-Open the [examples](./examples) directory, there are `vue` and `react` examples.
+## Adding shadcn/ui Components
 
-- [react](./examples/react): Simple react example.
-- [vue](./examples/vue): Simple vue example.
-- [vue-esm](./examples/vue-esm): Simple vue (ESM Extension) example.
-- [vue-import](./examples/vue-import): Dynamic import() and multi-page examples.
+```bash
+# Add a new component
+pnpm dlx shadcn@latest add [component-name]
 
-## Related
-
-- [@tomjs/vscode](https://npmjs.com/package/@tomjs/vscode): Some utilities to simplify the development of [VSCode Extensions](https://marketplace.visualstudio.com/VSCode).
-- [@tomjs/vscode-dev](https://npmjs.com/package/@tomjs/vscode-dev): Some development tools to simplify the development of [vscode extensions](https://marketplace.visualstudio.com/VSCode).
-- [@tomjs/vscode-webview](https://npmjs.com/package/@tomjs/vscode-webview): Optimize the `postMessage` issue between `webview` page and [vscode extensions](https://marketplace.visualstudio.com/VSCode)
-
-## Important Notes
-
-### v6.0.0
-
-**Breaking Updates:**
-
-Change the global `__getWebviewHtml__` method to a virtual module method called `import { getWebviewHtml } from 'virtual:vscode';`.
-
-before:
-
-```ts
-__getWebviewHtml__({
-  // vite 开发模式
-  serverUrl: process.env.VITE_DEV_SERVER_URL,
-  // vite 生产模式
-  webview,
-  context,
-});
+# Example: Add dialog component
+pnpm dlx shadcn@latest add dialog
 ```
 
-after：
+## Available Components
 
-```ts
-import { getWebviewHtml } from 'virtual:vscode';
+Pre-installed shadcn/ui components:
 
-getWebviewHtml({
-  // vite 开发模式
-  serverUrl: process.env.VITE_DEV_SERVER_URL,
-  // vite 生产模式
-  webview,
-  context,
-});
+- Button
+- Card
+- Input
+- Label
+- Badge
+- Separator
+- Textarea
+
+## Testing
+
+This template includes comprehensive testing support:
+
+### Unit Tests (Vitest + Testing Library)
+
+```bash
+# Run all unit tests
+pnpm test
+
+# Run tests in watch mode
+pnpm test:watch
+
+# Run tests with coverage report
+pnpm test:coverage
 ```
 
-### v5.0.0
+### Extension Integration Tests
 
-**Breaking Updates:**
+```bash
+# Run VSCode extension tests
+pnpm test:extension
+```
 
-- Using [tsdown](https://tsdown.dev/zh-CN) instead of [tsup](https://tsup.egoist.dev/), the vscode extension [extension](#ExtensionOptions) configuration is changed to inherit [tsdown](https://tsdown.dev/zh-CN).
+### E2E Tests (Playwright)
 
-### v4.0.0
+```bash
+# Run E2E tests
+pnpm test:e2e
 
-**Breaking Updates:**
+# Run E2E tests with UI mode
+pnpm test:e2e:ui
 
-- Merge the `__getWebviewHtml__` method for development and production into one, see [getWebviewHtml](#getwebviewhtml)
+# View test report
+pnpm test:e2e:report
+```
 
-### v3.0.0
+## Scripts
 
-**Breaking Updates:**
+| Command                | Description                       |
+| ---------------------- | --------------------------------- |
+| `pnpm dev`             | Start development server with HMR |
+| `pnpm build`           | Build for production              |
+| `pnpm lint`            | Run ESLint                        |
+| `pnpm test`            | Run unit tests                    |
+| `pnpm test:watch`      | Run tests in watch mode           |
+| `pnpm test:coverage`   | Run tests with coverage           |
+| `pnpm test:extension`  | Run extension integration tests   |
+| `pnpm test:e2e`        | Run E2E tests with Playwright     |
+| `pnpm test:e2e:ui`     | Run E2E tests with UI mode        |
+| `pnpm test:e2e:report` | View test report                  |
+| `pnpm package`         | Package extension as .vsix        |
+| `pnpm publish`         | Publish extension to marketplace  |
 
-- The simulated `acquireVsCodeApi` is consistent with the `acquireVsCodeApi` of [@types/vscode-webview](https://www.npmjs.com/package/@types/vscode-webview), and `sessionStorage.getItem` and `sessionStorage.setItem` are used to implement `getState` and `setState`.
+## VSCode Theme Integration
+
+The template uses VSCode theme variables for seamless integration:
+
+- Background colors match editor theme
+- Text colors adapt to light/dark mode
+- Focus states use VSCode accent colors
+
+## License
+
+MIT

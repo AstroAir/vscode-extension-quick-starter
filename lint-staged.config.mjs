@@ -1,4 +1,3 @@
 export default {
-  '*.{css,scss,less,html,vue}': ['stylelint --fix'],
-  '*': ['eslint --fix'],
+  '*.{js,ts,jsx,tsx,mjs}': ['eslint --fix'],
 };

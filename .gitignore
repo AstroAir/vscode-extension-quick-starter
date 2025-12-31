@@ -57,3 +57,14 @@ tsconfig.tsbuildinfo
 build
 dist
 release
+*.vsix
+
+# test output
+__tests__/out
+coverage
+test-results
+playwright-report
+.nyc_output
+
+# vscode test
+.vscode-test
