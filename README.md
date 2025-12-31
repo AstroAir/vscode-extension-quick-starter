@@ -1,5 +1,7 @@
 # VSCode Extension Quick Starter
 
+[![CI](https://github.com/AstroAir/vscode-extension-quick-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/AstroAir/vscode-extension-quick-starter/actions/workflows/ci.yml)
+
 A modern VSCode extension starter template with **React + shadcn/ui + Tailwind CSS**.
 
 ## Features
