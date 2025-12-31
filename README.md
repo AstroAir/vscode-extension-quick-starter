@@ -4,16 +4,16 @@ A modern VSCode extension starter template with **React + shadcn/ui + Tailwind C
 
 ## Features
 
-- ⚡ **Vite** - Lightning fast HMR for development
-- ⚛️ **React 19** - Latest React with hooks
-- 🎨 **shadcn/ui** - Beautiful, accessible components
-- 🎯 **Tailwind CSS v4** - Utility-first CSS framework
-- 📦 **TypeScript** - Full type safety
-- 🔧 **ESLint** - Code quality and consistency
-- 🚀 **Hot Module Replacement** - Instant feedback during development
-- ✅ **Vitest** - Fast unit testing with React Testing Library
-- 🧪 **Extension Tests** - VSCode extension integration tests
-- 🔄 **GitHub Actions** - CI/CD workflows for testing and releases
+- **Vite** - Lightning fast HMR for development
+- **React 19** - Latest React with hooks
+- **shadcn/ui** - Beautiful, accessible components
+- **Tailwind CSS v4** - Utility-first CSS framework
+- **TypeScript** - Full type safety
+- **ESLint** - Code quality and consistency
+- **Hot Module Replacement** - Instant feedback during development
+- **Vitest** - Fast unit testing with React Testing Library
+- **Extension Tests** - VSCode extension integration tests
+- **GitHub Actions** - CI/CD workflows for testing and releases
 
 ## Project Structure
 
